@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from './ui/select';
 import { Textarea } from './ui/textarea';
+import { toast } from "sonner"; // Import toast
 
 interface AddActivityModalProps {
   isOpen: boolean;
@@ -47,7 +48,6 @@ interface ActivityFormValues {
 
 const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, onActivityAdded, leadId }) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<ActivityFormValues>({
     defaultValues: {
@@ -70,20 +70,18 @@ const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, on
         activity_type: 'call',
         duration: null,
       });
-    } else {
-      setError(null);
     }
   }, [isOpen, form]);
 
   async function onSubmit(values: ActivityFormValues) {
     setLoading(true);
-    setError(null);
     try {
       await api.post(`/leads/${leadId}/activities`, values);
       onActivityAdded();
       onClose();
+      toast.success("Activity added successfully!"); // Success toast
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to add activity');
+      toast.error(err.response?.data?.detail || 'Failed to add activity'); // Error toast
     } finally {
       setLoading(false);
     }
@@ -191,7 +189,6 @@ const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, on
                 </FormItem>
               )}
             />
-            {error && <p className="text-red-500 text-sm text-center">API Error: {error}</p>}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
               <Button type="submit" disabled={loading}>

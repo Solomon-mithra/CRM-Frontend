@@ -20,6 +20,14 @@ import {
   FormMessage,
 } from './ui/form';
 import { Textarea } from './ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+import { toast } from "sonner"; // Import toast
 
 interface AddLeadModalProps {
   isOpen: boolean;
@@ -35,11 +43,13 @@ interface LeadFormValues {
   budget_min?: number | null;
   budget_max?: number | null;
   property_interest?: string | null;
+  source: string; // Added source
 }
+
+const sourceOptions = ["website", "referral", "zillow", "other"];
 
 const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdded }) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<LeadFormValues>({
     defaultValues: {
@@ -50,25 +60,25 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
       budget_min: null,
       budget_max: null,
       property_interest: "",
+      source: "website", // Added default source
     },
   });
 
   useEffect(() => {
     if (!isOpen) {
       form.reset();
-      setError(null);
     }
   }, [isOpen, form]);
 
   async function onSubmit(values: LeadFormValues) {
     setLoading(true);
-    setError(null);
     try {
       await api.post('/leads', values);
       onLeadAdded();
       onClose();
+      toast.success("Lead added successfully!"); // Success toast
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to add lead');
+      toast.error(err.response?.data?.detail || 'Failed to add lead'); // Error toast
     } finally {
       setLoading(false);
     }
@@ -204,6 +214,31 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
             </div>
             <FormField
               control={form.control}
+              name="source"
+              rules={{ required: "Source is required" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Source</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a source" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {sourceOptions.map((source) => (
+                        <SelectItem key={source} value={source}>
+                          {source.charAt(0).toUpperCase() + source.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="property_interest"
               render={({ field }) => (
                 <FormItem>
@@ -215,8 +250,6 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
                 </FormItem>
               )}
             />
-
-            {error && <p className="text-red-500 text-sm text-center">API Error: {error}</p>}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>

@@ -91,7 +91,6 @@ function AnalyticsDashboardPage() {
           <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
           <p className="text-sm text-muted-foreground">An overview of your lead and activity metrics.</p>
         </div>
-        <Link to="/dashboard" className="text-sm text-indigo-600 hover:underline">Back to Leads</Link>
       </div>
 
       {/* Metric Cards */}

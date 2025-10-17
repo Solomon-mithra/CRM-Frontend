@@ -153,7 +153,7 @@ function LeadDetailPage() {
             <CardTitle>Activity Timeline</CardTitle>
             <CardDescription>A log of all interactions with this lead.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4">
             <div className="flex justify-end mb-4">
                 <Button onClick={() => setIsActivityModalOpen(true)}>Add New Activity</Button>
             </div>

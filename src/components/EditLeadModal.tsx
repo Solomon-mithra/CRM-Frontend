@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from './ui/select';
 import type { Lead } from '../types/lead';
+import { toast } from "sonner"; // Import toast
 
 interface EditLeadModalProps {
   isOpen: boolean;
@@ -48,9 +49,10 @@ interface EditLeadFormValues {
   property_interest?: string | null;
 }
 
+const sourceOptions = ["website", "referral", "zillow", "other"];
+
 const EditLeadModal: React.FC<EditLeadModalProps> = ({ isOpen, onClose, onLeadUpdated, lead }) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<EditLeadFormValues>({
     defaultValues: {
@@ -59,7 +61,7 @@ const EditLeadModal: React.FC<EditLeadModalProps> = ({ isOpen, onClose, onLeadUp
       email: "",
       phone: "",
       status: 'new', // Default status
-      source: "",
+      source: "website", // Default source
       budget_min: null,
       budget_max: null,
       property_interest: "",
@@ -79,20 +81,18 @@ const EditLeadModal: React.FC<EditLeadModalProps> = ({ isOpen, onClose, onLeadUp
         budget_max: lead.budget_max,
         property_interest: lead.property_interest,
       });
-    } else {
-      setError(null);
     }
   }, [isOpen, lead, form]);
 
   async function onSubmit(values: EditLeadFormValues) {
     setLoading(true);
-    setError(null);
     try {
       await api.put(`/leads/${lead.id}`, values);
       onLeadUpdated();
       onClose();
+      toast.success("Lead updated successfully!"); // Success toast
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to update lead');
+      toast.error(err.response?.data?.detail || 'Failed to update lead'); // Error toast
     } finally {
       setLoading(false);
     }
@@ -205,9 +205,20 @@ const EditLeadModal: React.FC<EditLeadModalProps> = ({ isOpen, onClose, onLeadUp
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Source</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Website, Referral" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a source" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {sourceOptions.map((source) => (
+                        <SelectItem key={source} value={source}>
+                          {source.charAt(0).toUpperCase() + source.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -279,8 +290,6 @@ const EditLeadModal: React.FC<EditLeadModalProps> = ({ isOpen, onClose, onLeadUp
                 </FormItem>
               )}
             />
-
-            {error && <p className="text-red-500 text-sm text-center">API Error: {error}</p>}
 
             <DialogFooter className="pt-4">
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>

@@ -146,7 +146,7 @@ function LeadPage() {
       {leads.length === 0 ? (
         <p>No leads found. Create one!</p>
       ) : (
-        <div className="rounded-md border">
+        <div className="rounded-md border px-4">
           <Table>
             <TableHeader>
               <TableRow>
