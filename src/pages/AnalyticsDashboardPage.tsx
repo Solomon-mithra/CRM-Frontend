@@ -137,7 +137,7 @@ function AnalyticsDashboardPage() {
                   <div>
                     <p className="text-sm font-medium">{activity.title}</p>
                     <p className="text-xs text-gray-500">
-                      For lead <Link to={`/leads/${activity.lead_id}`} className="text-indigo-600 hover:underline">{activity.lead_first_name || 'Unknown'} {activity.lead_last_name || 'Lead'}</Link> on {new Date(activity.activity_date).toLocaleDateString()}
+                      For <Link to={`/leads/${activity.lead_id}`} className="text-indigo-600 hover:underline">lead</Link>  on {new Date(activity.activity_date).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
