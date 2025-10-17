@@ -3,6 +3,8 @@
   This project is a comprehensive, full-stack Real Estate CRM Lead Management System designed to empower real estate agents with efficient tools for managing their leads and
   activities. It provides a robust platform for user authentication, streamlined lead management, activity tracking, and insightful dashboard analytics.
 
+Time Spent: 4 hours approx.
+
 ##  Key Features:
 
 
