@@ -39,6 +39,7 @@ function App() {
           }
         />
         <Route path="/" element={<ProtectedRoute><Layout><LeadPage /></Layout></ProtectedRoute>} /> {/* Default route */}
+        <Route path="*" element={<ProtectedRoute><Layout><LeadPage /></Layout></ProtectedRoute>} /> {/* Catch-all route for any unmatched path */}
       </Routes>
       <Toaster />
     </>
