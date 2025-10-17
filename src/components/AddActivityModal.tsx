@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form'; // No FieldValues or ControllerRenderProps needed
+// Removed: import { zodResolver } from '@hookform/resolvers/zod';
+// Removed: import { z } from 'zod';
 import api from '../services/api';
 import {
   Dialog,
@@ -14,12 +14,12 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Form, // Re-added
+  FormControl, // Re-added
+  FormField, // Re-added
+  FormItem, // Re-added
+  FormLabel, // Re-added
+  FormMessage, // Re-added
 } from './ui/form';
 import {
   Select,
@@ -37,24 +37,23 @@ interface AddActivityModalProps {
   leadId: number;
 }
 
-const activitySchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  notes: z.string().optional(),
-  activity_date: z.string().min(1, { message: "Date is required" }), // Using string for input type="date"
-  activity_type: z.enum(['call', 'email', 'meeting', 'note']),
-  duration: z.coerce.number().positive().optional().nullable(),
-});
+interface ActivityFormValues {
+  title: string;
+  notes?: string;
+  activity_date: string;
+  activity_type: 'call' | 'email' | 'meeting' | 'note';
+  duration?: number | null;
+}
 
 const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, onActivityAdded, leadId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<z.infer<typeof activitySchema>>({
-    resolver: zodResolver(activitySchema),
+  const form = useForm<ActivityFormValues>({
     defaultValues: {
       title: "",
       notes: "",
-      activity_date: new Date().toISOString().split('T')[0], // Default to today
+      activity_date: new Date().toISOString().split('T')[0],
       activity_type: 'call',
       duration: null,
     },
@@ -64,7 +63,6 @@ const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, on
 
   useEffect(() => {
     if (isOpen) {
-      // Reset with default values when opening
       form.reset({
         title: "",
         notes: "",
@@ -77,7 +75,7 @@ const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, on
     }
   }, [isOpen, form]);
 
-  async function onSubmit(values: z.infer<typeof activitySchema>) {
+  async function onSubmit(values: ActivityFormValues) {
     setLoading(true);
     setError(null);
     try {
@@ -103,6 +101,7 @@ const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, on
             <FormField
               control={form.control}
               name="activity_type"
+              rules={{ required: "Activity type is required" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Activity Type</FormLabel>
@@ -126,6 +125,7 @@ const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, on
             <FormField
               control={form.control}
               name="title"
+              rules={{ required: "Title is required" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Title</FormLabel>
@@ -139,6 +139,7 @@ const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, on
             <FormField
               control={form.control}
               name="activity_date"
+              rules={{ required: "Date is required" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Date</FormLabel>
@@ -153,11 +154,24 @@ const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, on
               <FormField
                 control={form.control}
                 name="duration"
+                rules={{
+                  min: { value: 1, message: "Duration must be positive" },
+                  validate: (value) => (value === null || value === undefined || !isNaN(value as number)) || "Invalid number",
+                }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Duration (minutes)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="30" {...field} value={field.value ?? ''} />
+                      <Input
+                        type="number"
+                        placeholder="30"
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? null : Number(value));
+                        }}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -177,7 +191,7 @@ const AddActivityModal: React.FC<AddActivityModalProps> = ({ isOpen, onClose, on
                 </FormItem>
               )}
             />
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            {error && <p className="text-red-500 text-sm text-center">API Error: {error}</p>}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
               <Button type="submit" disabled={loading}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Button } from '../components/ui/button';
@@ -15,37 +15,7 @@ import {
 } from '../components/ui/alert-dialog';
 import AddActivityModal from '../components/AddActivityModal';
 import EditLeadModal from '../components/EditLeadModal';
-
-// As per the PDF Data Models
-interface Lead {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  status: string;
-  source: string;
-  budget_min: number | null;
-  budget_max: number | null;
-  property_interest: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  activity_count: number;
-}
-
-interface Activity {
-  id: number;
-  lead_id: number;
-  user_id: number;
-  activity_type: 'call' | 'email' | 'meeting' | 'note';
-  title: string;
-  notes: string | null;
-  duration: number | null;
-  activity_date: string;
-  created_at: string;
-  user_name: string;
-}
+import type { Lead, Activity } from '../types/lead';
 
 function LeadDetailPage() {
   const { id } = useParams<{ id: string }>();

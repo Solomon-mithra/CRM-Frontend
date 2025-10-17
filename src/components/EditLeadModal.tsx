@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import api from '../services/api';
 import {
   Dialog,
@@ -29,20 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-
-// This should ideally be in a shared types file
-interface Lead {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  status: string;
-  source: string;
-  budget_min: number | null;
-  budget_max: number | null;
-  property_interest: string | null;
-}
+import type { Lead } from '../types/lead';
 
 interface EditLeadModalProps {
   isOpen: boolean;
@@ -51,24 +36,34 @@ interface EditLeadModalProps {
   lead: Lead;
 }
 
-const leadEditSchema = z.object({
-  first_name: z.string().min(1, { message: "First name is required" }),
-  last_name: z.string().min(1, { message: "Last name is required" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  phone: z.string().optional(),
-  status: z.enum(['new', 'contacted', 'qualified', 'negotiation', 'closed', 'lost']),
-  source: z.string().min(1, { message: "Source is required" }),
-  budget_min: z.coerce.number().positive().optional().nullable(),
-  budget_max: z.coerce.number().positive().optional().nullable(),
-  property_interest: z.string().optional().nullable(),
-});
+interface EditLeadFormValues {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  status: 'new' | 'contacted' | 'qualified' | 'negotiation' | 'closed' | 'lost';
+  source: string;
+  budget_min?: number | null;
+  budget_max?: number | null;
+  property_interest?: string | null;
+}
 
 const EditLeadModal: React.FC<EditLeadModalProps> = ({ isOpen, onClose, onLeadUpdated, lead }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<z.infer<typeof leadEditSchema>>({
-    resolver: zodResolver(leadEditSchema),
+  const form = useForm<EditLeadFormValues>({
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      status: 'new', // Default status
+      source: "",
+      budget_min: null,
+      budget_max: null,
+      property_interest: "",
+    },
   });
 
   useEffect(() => {
@@ -89,7 +84,7 @@ const EditLeadModal: React.FC<EditLeadModalProps> = ({ isOpen, onClose, onLeadUp
     }
   }, [isOpen, lead, form]);
 
-  async function onSubmit(values: z.infer<typeof leadEditSchema>) {
+  async function onSubmit(values: EditLeadFormValues) {
     setLoading(true);
     setError(null);
     try {
@@ -115,45 +110,177 @@ const EditLeadModal: React.FC<EditLeadModalProps> = ({ isOpen, onClose, onLeadUp
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 py-4 max-h-[70vh] overflow-y-auto px-2">
             <div className="grid grid-cols-2 gap-3">
-              <FormField control={form.control} name="first_name" render={({ field }) => (
-                <FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )}/>
-              <FormField control={form.control} name="last_name" render={({ field }) => (
-                <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )}/>
+              <FormField
+                control={form.control}
+                name="first_name"
+                rules={{ required: "First name is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="last_name"
+                rules={{ required: "Last name is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <FormField control={form.control} name="email" render={({ field }) => (
-              <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
-            <FormField control={form.control} name="phone" render={({ field }) => (
-              <FormItem><FormLabel>Phone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
-            <FormField control={form.control} name="status" render={({ field }) => (
-              <FormItem><FormLabel>Status</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl><SelectContent>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="qualified">Qualified</SelectItem>
-                <SelectItem value="negotiation">Negotiation</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-                <SelectItem value="lost">Lost</SelectItem>
-              </SelectContent></Select><FormMessage /></FormItem>
-            )}/>
-            <FormField control={form.control} name="source" render={({ field }) => (
-              <FormItem><FormLabel>Source</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
+            <FormField
+              control={form.control}
+              name="email"
+              rules={{
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address"
+                }
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="john.doe@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+1-555-0100" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="status"
+              rules={{ required: "Status is required" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="contacted">Contacted</SelectItem>
+                      <SelectItem value="qualified">Qualified</SelectItem>
+                      <SelectItem value="negotiation">Negotiation</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="lost">Lost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="source"
+              rules={{ required: "Source is required" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Source</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Website, Referral" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="grid grid-cols-2 gap-3">
-              <FormField control={form.control} name="budget_min" render={({ field }) => (
-                <FormItem><FormLabel>Min. Budget</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
-              )}/>
-              <FormField control={form.control} name="budget_max" render={({ field }) => (
-                <FormItem><FormLabel>Max. Budget</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
-              )}/>
+              <FormField
+                control={form.control}
+                name="budget_min"
+                rules={{
+                  min: { value: 1, message: "Budget must be positive" },
+                  validate: (value) => (value === null || value === undefined || !isNaN(value as number)) || "Invalid number",
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Min. Budget</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="300000"
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? null : Number(value));
+                        }}
+                        value={field.value ?? ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="budget_max"
+                rules={{
+                  min: { value: 1, message: "Budget must be positive" },
+                  validate: (value) => (value === null || value === undefined || !isNaN(value as number)) || "Invalid number",
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max. Budget</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="450000"
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? null : Number(value));
+                        }}
+                        value={field.value ?? ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <FormField control={form.control} name="property_interest" render={({ field }) => (
-              <FormItem><FormLabel>Property Interest</FormLabel><FormControl><Textarea {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
-            )}/>
-            
-            {error && <p className="text-red-500 text-sm text-center pt-2">{error}</p>}
+            <FormField
+              control={form.control}
+              name="property_interest"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Property Interest</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="e.g., 3BR house in suburban area" {...field} value={field.value ?? ''} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {error && <p className="text-red-500 text-sm text-center">API Error: {error}</p>}
 
             <DialogFooter className="pt-4">
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>

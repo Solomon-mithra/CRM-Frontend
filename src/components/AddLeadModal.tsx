@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import api from '../services/api';
 import {
   Dialog,
@@ -29,22 +27,21 @@ interface AddLeadModalProps {
   onLeadAdded: () => void;
 }
 
-const leadSchema = z.object({
-  first_name: z.string().min(1, { message: "First name is required" }),
-  last_name: z.string().min(1, { message: "Last name is required" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  phone: z.string().optional(),
-  budget_min: z.coerce.number().positive().optional().nullable(),
-  budget_max: z.coerce.number().positive().optional().nullable(),
-  property_interest: z.string().optional().nullable(),
-});
+interface LeadFormValues {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  budget_min?: number | null;
+  budget_max?: number | null;
+  property_interest?: string | null;
+}
 
 const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdded }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<z.infer<typeof leadSchema>>({
-    resolver: zodResolver(leadSchema),
+  const form = useForm<LeadFormValues>({
     defaultValues: {
       first_name: "",
       last_name: "",
@@ -63,7 +60,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
     }
   }, [isOpen, form]);
 
-  async function onSubmit(values: z.infer<typeof leadSchema>) {
+  async function onSubmit(values: LeadFormValues) {
     setLoading(true);
     setError(null);
     try {
@@ -92,6 +89,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
               <FormField
                 control={form.control}
                 name="first_name"
+                rules={{ required: "First name is required" }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
@@ -105,6 +103,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
               <FormField
                 control={form.control}
                 name="last_name"
+                rules={{ required: "Last name is required" }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
@@ -119,6 +118,13 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
             <FormField
               control={form.control}
               name="email"
+              rules={{
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address"
+                }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
@@ -146,11 +152,24 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
               <FormField
                 control={form.control}
                 name="budget_min"
+                rules={{
+                  min: { value: 1, message: "Budget must be positive" },
+                  validate: (value) => (value === null || value === undefined || !isNaN(value as number)) || "Invalid number",
+                }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Min. Budget</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="300000" {...field} value={field.value ?? ''} />
+                      <Input
+                        type="number"
+                        placeholder="300000"
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? null : Number(value));
+                        }}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -159,11 +178,24 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
               <FormField
                 control={form.control}
                 name="budget_max"
+                rules={{
+                  min: { value: 1, message: "Budget must be positive" },
+                  validate: (value) => (value === null || value === undefined || !isNaN(value as number)) || "Invalid number",
+                }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Max. Budget</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="450000" {...field} value={field.value ?? ''} />
+                      <Input
+                        type="number"
+                        placeholder="450000"
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? null : Number(value));
+                        }}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -184,16 +216,16 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ isOpen, onClose, onLeadAdde
               )}
             />
 
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            {error && <p className="text-red-500 text-sm text-center">API Error: {error}</p>}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
               <Button type="submit" disabled={loading}>
                 {loading ? 'Adding Lead...' : 'Add Lead'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
       </DialogContent>
     </Dialog>
   );

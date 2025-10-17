@@ -1,4 +1,4 @@
-import { Home, Users, LogOut, BarChart2 } from "lucide-react"
+import { Home, Users, LogOut } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 

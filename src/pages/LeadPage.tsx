@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../services/api'
 import { useAuth } from '../contexts/AuthContext';
@@ -28,26 +28,10 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table"
-
-export interface Lead {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  status: string;
-  source: string;
-  budget_min: number | null;
-  budget_max: number | null;
-  property_interest: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  activity_count: number;
-}
+import type { Lead } from '../types/lead';
 
 function LeadPage() {
-  const { logout, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,10 +75,7 @@ function LeadPage() {
     fetchLeads();
   }, [isAuthenticated, navigate, fetchLeads]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
