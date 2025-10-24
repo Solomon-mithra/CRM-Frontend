@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form"
+import AuthLayout from '../components/AuthLayout'
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <AuthLayout>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">Create a new account</CardTitle>
@@ -150,7 +151,7 @@ function RegisterPage() {
           </p>
         </CardFooter>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }
 

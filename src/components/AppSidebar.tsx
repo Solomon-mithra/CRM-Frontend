@@ -43,12 +43,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader>
+      <SidebarHeader className="my-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link to="/dashboard">
-                <span className="text-lg font-semibold">CRM Tool</span>
+                <span className="text-2xl font-extrabold">CRM<span className="font-light italic">Toolbar</span></span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
