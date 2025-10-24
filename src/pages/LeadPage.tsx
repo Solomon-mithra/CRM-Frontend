@@ -29,6 +29,7 @@ import {
   TableRow,
 } from "../components/ui/table"
 import type { Lead } from '../types/lead';
+import { Plus } from 'lucide-react';
 
 function LeadPage() {
   const { isAuthenticated } = useAuth();
@@ -109,7 +110,7 @@ function LeadPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">
-          LeadsDashboard
+          Leads Dashboard
         </h1>
         <div className="flex items-center">
           
@@ -117,7 +118,7 @@ function LeadPage() {
             onClick={() => setIsModalOpen(true)}
             className="mr-4"
           >
-            Add New Lead
+             <Plus />Add New Lead
           </Button>
         </div>
       </div>

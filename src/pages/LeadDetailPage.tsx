@@ -16,6 +16,7 @@ import {
 import AddActivityModal from '../components/AddActivityModal';
 import EditLeadModal from '../components/EditLeadModal';
 import type { Lead, Activity } from '../types/lead';
+import { ChartCandlestick, CircleDollarSign, ClockPlus, LayoutTemplate, Mail, Pencil, Phone, Plus, Trash2 } from 'lucide-react';
 
 function LeadDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -108,8 +109,8 @@ function LeadDetailPage() {
           <p className="text-sm text-gray-500">{lead.property_interest || 'No specific property interest'}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsEditModalOpen(true)}>Edit Lead</Button>
-          <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>Delete Lead</Button>
+          <Button variant="outline" onClick={() => setIsEditModalOpen(true)}><Pencil />Edit Lead</Button>
+          <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}><Trash2 />Delete Lead</Button>
         </div>
       </div>
 
@@ -121,27 +122,27 @@ function LeadDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-gray-500">Email</p>
+              <p className="text-sm font-medium text-gray-500"><span className='flex '><Mail size={16} className='mt-0.5 mr-1'/>Email</span></p>
               <a href={`mailto:${lead.email}`} className="text-sm text-indigo-600 hover:underline">{lead.email}</a>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">Phone</p>
+              <p className="text-sm font-medium text-gray-500"><span className='flex '><Phone size={16} className='mt-0.5 mr-1'/>Phone</span></p>
               <a href={`tel:${lead.phone}`} className="text-sm text-indigo-600 hover:underline">{lead.phone || 'N/A'}</a>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">Status</p>
+              <p className="text-sm font-medium text-gray-500"><span className='flex '><ChartCandlestick size={16} className='mt-0.5 mr-1'/>Status</span></p>
               <p><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(lead.status)}`}>{lead.status}</span></p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">Source</p>
+              <p className="text-sm font-medium text-gray-500"><span className='flex '><LayoutTemplate size={16} className='mt-0.5 mr-1'/>Source</span></p>
               <p className="text-sm text-gray-900">{lead.source}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">Budget</p>
+              <p className="text-sm font-medium text-gray-500"><span className='flex '><CircleDollarSign size={16} className='mt-0.5 mr-1'/>Budget</span></p>
               <p className="text-sm text-gray-900">${lead.budget_min?.toLocaleString() || '?'} - ${lead.budget_max?.toLocaleString() || '?'}</p>
             </div>
-             <div>
-              <p className="text-sm font-medium text-gray-500">Created On</p>
+            <div>
+              <p className=" text-sm font-medium text-gray-500"><span className='flex '><ClockPlus size={16} className='mt-0.5 mr-1'/>Created On</span></p>
               <p className="text-sm text-gray-900">{new Date(lead.created_at).toLocaleDateString()}</p>
             </div>
           </CardContent>
@@ -150,13 +151,18 @@ function LeadDetailPage() {
         {/* Activity Timeline */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Activity Timeline</CardTitle>
-            <CardDescription>A log of all interactions with this lead.</CardDescription>
+            <div className="flex items-center justify-between mt-2">
+              <div>
+                <CardTitle className='mb-1'>Activity Timeline</CardTitle>
+                <CardDescription>A log of all interactions with this lead.</CardDescription>
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={() => setIsActivityModalOpen(true)}><Plus/>Add New Activity</Button>
+            </div>
+            </div>
           </CardHeader>
           <CardContent className="px-4">
-            <div className="flex justify-end mb-4">
-                <Button onClick={() => setIsActivityModalOpen(true)}>Add New Activity</Button>
-            </div>
+            
             <div className="space-y-6">
               {activities.length > 0 ? (
                 activities.map(activity => (
