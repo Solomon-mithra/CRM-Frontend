@@ -30,12 +30,12 @@ const StatCard = ({ title, value, icon: Icon }: { title: string, value: number, 
   const formattedValue = String(value).padStart(2, '0');
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 ">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-4xl font-bold pt-1">{formattedValue}</div>
+        <div className="text-6xl font-bold">{formattedValue}</div>
       </CardContent>
     </Card>
   );
